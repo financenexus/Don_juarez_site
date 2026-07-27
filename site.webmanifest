@@ -1,0 +1,22 @@
+{
+  "name": "Don Juarez Tabaco",
+  "short_name": "Don Juarez",
+  "description": "Tabaco premium selecionado do Sul do Brasil.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07100a",
+  "theme_color": "#07100a",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

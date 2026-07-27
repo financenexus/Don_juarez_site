@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://tabacodonjuarez.com.br/</loc>
+    <lastmod>2026-07-27</lastmod>
+    <image:image>
+      <image:loc>https://tabacodonjuarez.com.br/assets/hero-tobacco-ZjFMGrG6.jpg</image:loc>
+      <image:title>Don Juarez Tabaco premium do Sul do Brasil</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tabacodonjuarez.com.br/sobre/</loc>
+    <lastmod>2026-07-27</lastmod>
+    <image:image>
+      <image:loc>https://tabacodonjuarez.com.br/assets/brand-story-CkvJFNXZ.jpg</image:loc>
+      <image:title>Origem e identidade da Don Juarez Tabaco</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tabacodonjuarez.com.br/produtos/</loc>
+    <lastmod>2026-07-27</lastmod>
+    <image:image>
+      <image:loc>https://tabacodonjuarez.com.br/assets/origin-MFiPUxCC.jpg</image:loc>
+      <image:title>Tabaco selecionado do Sul do Brasil</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tabacodonjuarez.com.br/contato/</loc>
+    <lastmod>2026-07-27</lastmod>
+  </url>
+  <url>
+    <loc>https://tabacodonjuarez.com.br/politica-de-privacidade/</loc>
+    <lastmod>2026-07-27</lastmod>
+  </url>
+</urlset>
