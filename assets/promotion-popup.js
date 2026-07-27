@@ -1,12 +1,9 @@
 (() => {
   const DISMISSED_KEY = "donjuarez-promotion-dismissed-v1";
   const FORCE_PREVIEW = new URLSearchParams(window.location.search).has("promo");
-  const OPEN_AFTER_MS = 30_000;
-  const OPEN_AFTER_SCROLL_DISTANCE = 700;
+  const BOTTOM_THRESHOLD_PX = 80;
 
   let opened = false;
-  let cumulativeScroll = 0;
-  let lastScrollY = window.scrollY;
   let previousFocus = null;
 
   const storage = {
@@ -50,11 +47,11 @@
   document.body.appendChild(popup);
 
   const cta = popup.querySelector("[data-promo-cta]");
-  let timer;
+  let previewTimer;
 
   function stopTriggers() {
     window.removeEventListener("scroll", handleScroll);
-    window.clearTimeout(timer);
+    window.clearTimeout(previewTimer);
   }
 
   function openPopup() {
@@ -82,16 +79,9 @@
   }
 
   function handleScroll() {
-    const currentScrollY = window.scrollY;
-    cumulativeScroll += Math.abs(currentScrollY - lastScrollY);
-    lastScrollY = currentScrollY;
-
-    if (
-      cumulativeScroll >= OPEN_AFTER_SCROLL_DISTANCE ||
-      currentScrollY >= window.innerHeight * 0.8
-    ) {
-      openPopup();
-    }
+    const pageBottom = window.scrollY + window.innerHeight;
+    const remainingDistance = document.documentElement.scrollHeight - pageBottom;
+    if (remainingDistance <= BOTTOM_THRESHOLD_PX) openPopup();
   }
 
   popup.addEventListener("click", (event) => {
@@ -107,5 +97,5 @@
   });
 
   window.addEventListener("scroll", handleScroll, { passive: true });
-  timer = window.setTimeout(openPopup, FORCE_PREVIEW ? 50 : OPEN_AFTER_MS);
+  if (FORCE_PREVIEW) previewTimer = window.setTimeout(openPopup, 50);
 })();
