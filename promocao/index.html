@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Don Juarez × Roda Rico — Você entrou na roda?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0a10;
+    --bg-card:#171320;
+    --bg-card-2:#1f1a2c;
+    --gold:#d4af37;
+    --gold-bright:#f3d670;
+    --green:#7ed957;
+    --magenta:#e0299b;
+    --cream:#f4ecd8;
+    --muted:#948a7c;
+    --line:#332c44;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(224,41,155,0.18), transparent 60%),
+      radial-gradient(ellipse 800px 500px at 100% 10%, rgba(126,217,87,0.10), transparent 55%),
+      var(--bg);
+    color:var(--cream);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+  }
+  .wrap{ width:100%; max-width:440px; }
+  .eyebrow{
+    text-align:center;
+    letter-spacing:0.28em;
+    font-size:12px;
+    color:var(--gold);
+    text-transform:uppercase;
+    margin-bottom:10px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    text-transform:uppercase;
+    text-align:center;
+    font-size:clamp(30px, 8vw, 42px);
+    line-height:1.02;
+    margin:0 0 10px;
+    letter-spacing:0.01em;
+    color:var(--cream);
+  }
+  h1 span{ color:var(--green); }
+  .sub{
+    text-align:center;
+    color:var(--muted);
+    font-size:14.5px;
+    line-height:1.5;
+    margin:0 auto 28px;
+    max-width:340px;
+  }
+  .sub b{ color:var(--cream); font-weight:600; }
+
+  /* ---- ticket card ---- */
+  .ticket{
+    position:relative;
+    background:linear-gradient(180deg, var(--bg-card), var(--bg-card-2));
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.04) inset;
+    overflow:hidden;
+  }
+  .ticket:before, .ticket:after{
+    content:"";
+    position:absolute;
+    width:26px; height:26px;
+    background:var(--bg);
+    border-radius:50%;
+    top:50%; transform:translateY(-50%);
+    box-shadow:0 0 0 1px var(--line);
+    z-index:3;
+  }
+  .ticket:before{ left:-13px; }
+  .ticket:after{ right:-13px; }
+  .perf{
+    position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
+    height:0; border-top:2px dashed var(--line);
+    z-index:1;
+  }
+  .stub-top{ padding:26px 26px 30px; position:relative; z-index:2; }
+  .stub-bottom{ padding:30px 26px 26px; position:relative; z-index:2; }
+
+  .label{
+    font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--muted); margin:0 0 6px; font-weight:600;
+  }
+  input[type=text], input[type=tel]{
+    width:100%;
+    background:#0f0d16;
+    border:1px solid var(--line);
+    color:var(--cream);
+    border-radius:9px;
+    padding:12px 13px;
+    font-size:15px;
+    font-family:'Work Sans', sans-serif;
+    margin-bottom:16px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  input[type=text]:focus, input[type=tel]:focus{ border-color:var(--gold); }
+
+  .ig-row{
+    display:flex; align-items:center; gap:10px;
+    background:#0f0d16; border:1px solid var(--line); border-radius:9px;
+    padding:12px 13px; margin-bottom:20px; cursor:pointer;
+  }
+  .ig-row input{ width:18px; height:18px; accent-color:var(--green); flex:none; }
+  .ig-row label{ font-size:14px; color:var(--cream); cursor:pointer; }
+  .ig-row a{ color:var(--gold-bright); text-decoration:none; font-weight:600; }
+  .ig-row a:hover{ text-decoration:underline; }
+
+  button.cta{
+    width:100%;
+    background:var(--gold);
+    color:#1a1408;
+    border:none;
+    border-radius:9px;
+    padding:14px;
+    font-size:14.5px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    font-family:'Work Sans', sans-serif;
+    cursor:pointer;
+    transition:transform .12s, background .15s;
+  }
+  button.cta:hover{ background:var(--gold-bright); }
+  button.cta:active{ transform:scale(0.98); }
+  button.cta:disabled{ opacity:0.55; cursor:not-allowed; }
+
+  .stub-label{
+    font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--muted); font-weight:600;
+  }
+  .row{ display:flex; justify-content:space-between; align-items:flex-end; }
+  .entry-num{
+    font-family:'Space Mono', monospace;
+    font-size:13px;
+    color:var(--green);
+  }
+
+  /* result state */
+  .result{ display:none; text-align:center; padding:34px 26px; position:relative; z-index:2; }
+  .result.show{ display:block; }
+  .stamp{
+    display:inline-block;
+    font-family:'Anton', sans-serif;
+    text-transform:uppercase;
+    font-size:26px;
+    letter-spacing:0.05em;
+    padding:8px 18px;
+    border:3px solid currentColor;
+    border-radius:8px;
+    transform:rotate(-4deg);
+    margin-bottom:18px;
+  }
+  .stamp.win{
+    color:var(--gold-bright);
+    border-width:2px;
+    transform:rotate(-2deg);
+    letter-spacing:0.08em;
+  }
+  .stamp.lose{ color:var(--muted); }
+  .result p{ color:var(--muted); font-size:14.5px; line-height:1.6; margin:0 0 6px; }
+  .result .code{
+    font-family:'Space Mono', monospace;
+    font-size:22px;
+    letter-spacing:0.12em;
+    color:var(--gold-bright);
+    background:#0f0d16;
+    border:1px dashed var(--gold);
+    border-radius:8px;
+    padding:12px;
+    margin:16px 0;
+  }
+  .result .entrynum{ color:var(--cream); font-weight:600; }
+  .err{ color:var(--magenta); font-size:13px; margin-top:10px; text-align:center; display:none; }
+  .err.show{ display:block; }
+  .foot{ text-align:center; color:var(--muted); font-size:12px; margin-top:22px; letter-spacing:0.02em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Don Juarez × Roda Rico</div>
+  <h1>Você entrou <span>na roda?</span></h1>
+  <p class="sub">Siga <b>@tabacodonjuarez</b>, confirme sua entrada e descubra na hora se você ganhou um ingresso para a Roda Rico.</p>
+
+  <div class="ticket">
+    <div class="perf"></div>
+
+    <form id="entryForm">
+      <div class="stub-top">
+        <div class="label">Seu nome</div>
+        <input type="text" id="nome" placeholder="Como podemos te chamar" required>
+        <div class="label">Instagram ou WhatsApp</div>
+        <input type="text" id="contato" placeholder="@seuinstagram ou (11) 90000-0000" required>
+      </div>
+      <div class="stub-bottom">
+        <div class="ig-row">
+          <input type="checkbox" id="igcheck" required>
+          <label for="igcheck">Já sigo <a href="https://instagram.com/tabacodonjuarez" target="_blank" rel="noopener noreferrer">@tabacodonjuarez</a> no Instagram</label>
+        </div>
+        <button type="submit" class="cta" id="submitBtn">Confirmar entrada</button>
+        <div class="err" id="errMsg">Não deu pra confirmar agora — tenta de novo em alguns segundos.</div>
+      </div>
+    </form>
+
+    <div class="result" id="resultBlock">
+      <div class="stub-top" style="padding-bottom:0;">
+        <div class="row">
+          <span class="stub-label">Entrada nº</span>
+          <span class="entry-num" id="entryNumOut">—</span>
+        </div>
+      </div>
+      <div id="resultInner"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/*
+  Antes de publicar: troque a URL abaixo pela URL do seu Google Apps Script
+  Web App (veja o arquivo apps-script.gs + instruções que vieram junto).
+*/
+const ENDPOINT_URL = "COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT";
+const LOCAL_TEST_MODE = location.protocol === 'file:' && ENDPOINT_URL.includes("COLE_AQUI");
+const LOCAL_TEST_STORAGE_KEY = 'donjuarez-promo-local-campaign-v2';
+const localTestState = loadLocalTestState();
+
+const form = document.getElementById('entryForm');
+const submitBtn = document.getElementById('submitBtn');
+const errMsg = document.getElementById('errMsg');
+const resultBlock = document.getElementById('resultBlock');
+const resultInner = document.getElementById('resultInner');
+const entryNumOut = document.getElementById('entryNumOut');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errMsg.classList.remove('show');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Confirmando...';
+
+  const payload = {
+    nome: document.getElementById('nome').value.trim(),
+    contato: document.getElementById('contato').value.trim()
+  };
+
+  try {
+    let data;
+
+    if (LOCAL_TEST_MODE) {
+      data = getLocalTestResult();
+    } else if (ENDPOINT_URL.includes("COLE_AQUI")) {
+      throw new Error("endpoint-not-configured");
+    } else {
+      const res = await fetch(ENDPOINT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight CORS
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('bad response');
+      data = await res.json();
+    }
+
+    if (data.error) throw new Error(data.error);
+    if (data.closed) {
+      showClosed(data.message);
+      return;
+    }
+    showResult(data);
+  } catch (err) {
+    errMsg.textContent = err.message === "endpoint-not-configured"
+      ? "Sistema ainda não conectado. Configure a URL do Google Apps Script."
+      : "Não deu pra confirmar agora — tenta de novo em alguns segundos.";
+    errMsg.classList.add('show');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Confirmar entrada';
+  }
+});
+
+function getLocalTestResult(){
+  if (localTestState.entries >= 500) {
+    return {
+      closed: true,
+      message: 'As 500 entradas do teste local já foram preenchidas.'
+    };
+  }
+
+  const entryNumber = localTestState.entries + 1;
+  const remainingTickets = Math.max(0, 4 - localTestState.tickets);
+  const remainingDiscounts = Math.max(0, 50 - localTestState.discounts);
+  const remainingEntries = 500 - localTestState.entries;
+  const ticketProbability = remainingTickets / remainingEntries;
+  const discountProbability = remainingDiscounts / remainingEntries;
+  const randomDraw = Math.random();
+  let prizeType = 'NONE';
+
+  if (randomDraw < ticketProbability) {
+    prizeType = 'TICKET';
+  } else if (randomDraw < ticketProbability + discountProbability) {
+    prizeType = 'DISCOUNT';
+  }
+
+  localTestState.entries = entryNumber;
+  if (prizeType === 'TICKET') localTestState.tickets++;
+  if (prizeType === 'DISCOUNT') localTestState.discounts++;
+  saveLocalTestState();
+
+  return {
+    entryNumber,
+    prizeType,
+    code: prizeType !== 'NONE' ? createLocalCode() : '',
+    localTest: true
+  };
+}
+
+function loadLocalTestState(){
+  const emptyState = { entries: 0, tickets: 0, discounts: 0 };
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(LOCAL_TEST_STORAGE_KEY));
+    if (
+      saved &&
+      Number.isInteger(saved.entries) &&
+      Number.isInteger(saved.tickets) &&
+      Number.isInteger(saved.discounts)
+    ) {
+      return saved;
+    }
+  } catch (error) {
+    // Some browsers restrict storage for local files. Start a fresh preview.
+  }
+
+  return emptyState;
+}
+
+function saveLocalTestState(){
+  try {
+    localStorage.setItem(LOCAL_TEST_STORAGE_KEY, JSON.stringify(localTestState));
+  } catch (error) {
+    // The page still works for the current load if local storage is unavailable.
+  }
+}
+
+function createLocalCode(){
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = new Uint8Array(8);
+
+  if (globalThis.crypto && globalThis.crypto.getRandomValues) {
+    globalThis.crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+
+  const characters = Array.from(bytes, value => alphabet[value % alphabet.length]);
+  return `DJ-${characters.slice(0, 4).join('')}-${characters.slice(4).join('')}`;
+}
+
+function showClosed(message){
+  form.style.display = 'none';
+  entryNumOut.textContent = '#500';
+  resultInner.innerHTML = `
+    <div class="result show" style="padding-top:10px;">
+      <div class="stamp lose">Encerrado</div>
+      <p>${message || 'As 500 entradas da promoção já foram preenchidas.'}</p>
+      <p>Obrigado por participar.</p>
+    </div>`;
+  resultBlock.classList.add('show');
+}
+
+function showResult(data){
+  form.style.display = 'none';
+  entryNumOut.textContent = '#' + String(data.entryNumber).padStart(3, '0');
+
+  if (data.prizeType === 'TICKET') {
+    resultInner.innerHTML = `
+      <div class="result show" style="padding-top:10px;">
+        <div class="stamp win">Experiência premiada</div>
+        <p>Uma experiência especial foi reservada para você.</p>
+        <p><b style="color:var(--cream)">Seu ingresso para a Roda Rico está garantido.</b></p>
+        <div class="code">${data.code}</div>
+        <p>Apresente este código no estande <b style="color:var(--cream)">Don Juarez</b> para receber seu ingresso físico.</p>
+      </div>`;
+  } else if (data.prizeType === 'DISCOUNT') {
+    resultInner.innerHTML = `
+      <div class="result show" style="padding-top:10px;">
+        <div class="stamp win">Benefício exclusivo</div>
+        <p>Um benefício especial foi reservado para você.</p>
+        <p>Aproveite <b style="color:var(--cream)">30% de desconto</b> em produtos no estande Don Juarez.</p>
+        <div class="code">${data.code}</div>
+        <p>Apresente este código no estande para liberar seu benefício.</p>
+      </div>`;
+  } else {
+    resultInner.innerHTML = `
+      <div class="result show" style="padding-top:10px;">
+        <div class="stamp lose">Presença confirmada</div>
+        <p>Sua participação foi registrada com sucesso.</p>
+        <p>É um prazer compartilhar este momento com você.</p>
+      </div>`;
+  }
+
+  if (data.localTest) {
+    resultInner.insertAdjacentHTML(
+      'beforeend',
+      '<p style="color:var(--gold);font-size:12px;margin:12px 20px 20px;text-align:center;">Modo de teste local — nenhum dado foi salvo.</p>'
+    );
+  }
+
+  resultBlock.classList.add('show');
+}
+
+</script>
+</body>
+</html>
