@@ -1,19 +1,10 @@
 (() => {
   "use strict";
 
-  // Fixed campaign window in São Paulo time (UTC-03:00).
-  const START_AT = Date.parse("2026-08-15T00:00:00-03:00");
+  // Active immediately; closes after 16 August in São Paulo time (UTC-03:00).
   const END_AT_EXCLUSIVE = Date.parse("2026-08-17T00:00:00-03:00");
 
   function getStatus(now = Date.now()) {
-    if (now < START_AT) {
-      return {
-        state: "before",
-        active: false,
-        message: "A promoção estará disponível nos dias 15 e 16 de agosto de 2026.",
-      };
-    }
-
     if (now >= END_AT_EXCLUSIVE) {
       return {
         state: "after",
@@ -39,7 +30,6 @@
   }
 
   window.DonJuarezCampaign = Object.freeze({
-    startAt: START_AT,
     endAtExclusive: END_AT_EXCLUSIVE,
     getStatus,
     isLocalPreview,

@@ -3,8 +3,7 @@
  * Cole este código em Extensões > Apps Script, dentro de uma Planilha Google.
  */
 
-// Janela fixa da campanha em horário de São Paulo (UTC-03:00).
-const CAMPAIGN_START_AT = Date.parse("2026-08-15T00:00:00-03:00");
+// Ativa imediatamente e encerra após 16 de agosto, no horário de São Paulo.
 const CAMPAIGN_END_AT_EXCLUSIVE = Date.parse("2026-08-17T00:00:00-03:00");
 
 // Distribui aleatoriamente 4 ingressos e 50 descontos entre 500 entradas.
@@ -93,14 +92,6 @@ function doPost(e) {
 }
 
 function getCampaignStatus_(now) {
-  if (now < CAMPAIGN_START_AT) {
-    return {
-      state: "before",
-      active: false,
-      message: "A promoção estará disponível nos dias 15 e 16 de agosto de 2026."
-    };
-  }
-
   if (now >= CAMPAIGN_END_AT_EXCLUSIVE) {
     return {
       state: "after",

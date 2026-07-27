@@ -15,12 +15,12 @@ const frontendContext = vm.createContext({
 vm.runInContext(frontendSource, frontendContext);
 
 const campaign = frontendWindow.DonJuarezCampaign;
-const before = Date.parse("2026-08-14T23:59:59-03:00");
+const nowDuringPreparation = Date.parse("2026-07-27T12:00:00-03:00");
 const opening = Date.parse("2026-08-15T00:00:00-03:00");
 const finalSecond = Date.parse("2026-08-16T23:59:59.999-03:00");
 const closing = Date.parse("2026-08-17T00:00:00-03:00");
 
-assert.equal(campaign.getStatus(before).state, "before");
+assert.equal(campaign.getStatus(nowDuringPreparation).state, "active");
 assert.equal(campaign.getStatus(opening).state, "active");
 assert.equal(campaign.getStatus(finalSecond).state, "active");
 assert.equal(campaign.getStatus(closing).state, "after");
@@ -34,7 +34,7 @@ vm.runInContext(
   backendContext
 );
 
-assert.equal(backendContext.getCampaignStatusForTest(before).state, "before");
+assert.equal(backendContext.getCampaignStatusForTest(nowDuringPreparation).state, "active");
 assert.equal(backendContext.getCampaignStatusForTest(opening).state, "active");
 assert.equal(backendContext.getCampaignStatusForTest(finalSecond).state, "active");
 assert.equal(backendContext.getCampaignStatusForTest(closing).state, "after");
