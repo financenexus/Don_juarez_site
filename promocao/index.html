@@ -191,6 +191,143 @@
     margin:16px 0;
   }
   .result .entrynum{ color:var(--cream); font-weight:600; }
+  .winner-reveal{
+    overflow:hidden;
+    animation:winner-card-in .75s cubic-bezier(.16,1,.3,1) both;
+  }
+  .winner-kicker{
+    color:var(--gold);
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .winner-title{
+    margin:0 0 18px;
+    font-family:'Anton', sans-serif;
+    font-size:clamp(48px, 13vw, 72px);
+    font-weight:400;
+    letter-spacing:.025em;
+    line-height:.95;
+    text-transform:uppercase;
+    background:linear-gradient(100deg, var(--cream), var(--gold-bright), var(--cream));
+    background-size:220% auto;
+    color:transparent;
+    -webkit-background-clip:text;
+    background-clip:text;
+    animation:winner-title-shine 2.2s linear infinite;
+  }
+  .winner-prize{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:46px;
+    margin:0 0 18px;
+    padding:10px 20px;
+    border:1px solid rgba(126,217,87,.58);
+    background:rgba(126,217,87,.08);
+    color:var(--green);
+    font-family:'Space Mono', monospace;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    box-shadow:0 0 28px rgba(126,217,87,.12);
+  }
+  .winner-reveal .code{
+    position:relative;
+    overflow:hidden;
+    animation:winner-code-pulse 1.5s ease-in-out infinite;
+  }
+  .winner-reveal .code::after{
+    content:"";
+    position:absolute;
+    inset:-40% auto -40% -25%;
+    width:18%;
+    background:rgba(255,255,255,.5);
+    filter:blur(8px);
+    transform:skewX(-20deg);
+    animation:winner-code-sweep 2.6s ease-in-out infinite;
+  }
+  .winner-instruction{
+    margin-top:14px !important;
+    padding-top:14px;
+    border-top:1px solid rgba(212,175,55,.18);
+  }
+  .preview-note{
+    color:var(--gold) !important;
+    font-size:11px !important;
+    letter-spacing:.05em;
+    margin-top:14px !important;
+  }
+  .celebration-layer{
+    position:fixed;
+    inset:0;
+    z-index:20;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .celebration-burst{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:min(82vw, 620px);
+    aspect-ratio:1;
+    border-radius:50%;
+    border:1px solid rgba(212,175,55,.28);
+    box-shadow:
+      0 0 80px rgba(212,175,55,.24),
+      inset 0 0 110px rgba(126,217,87,.08);
+    transform:translate(-50%,-50%) scale(.2);
+    animation:winner-burst 1.2s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  .celebration-piece{
+    position:absolute;
+    top:-12px;
+    left:var(--x);
+    width:var(--size);
+    height:calc(var(--size) * 1.8);
+    border-radius:2px;
+    background:var(--color);
+    opacity:0;
+    animation:winner-confetti var(--duration) var(--delay) cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  body.is-celebrating .ticket{
+    animation:winner-ticket-glow 1.4s ease-out;
+  }
+  @keyframes winner-card-in{
+    0%{opacity:0;filter:blur(12px);transform:translateY(45px) scale(.86);}
+    65%{opacity:1;filter:blur(0);transform:translateY(-5px) scale(1.02);}
+    100%{opacity:1;filter:blur(0);transform:translateY(0) scale(1);}
+  }
+  @keyframes winner-title-shine{to{background-position:220% center;}}
+  @keyframes winner-code-pulse{
+    0%,100%{box-shadow:0 0 0 rgba(212,175,55,0);}
+    50%{box-shadow:0 0 30px rgba(212,175,55,.22);}
+  }
+  @keyframes winner-code-sweep{
+    0%,42%{left:-25%;}
+    70%,100%{left:125%;}
+  }
+  @keyframes winner-burst{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.2);}
+    55%{opacity:1;}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.35);}
+  }
+  @keyframes winner-confetti{
+    0%{opacity:0;transform:translate3d(0,-5vh,0) rotate(0);}
+    12%{opacity:1;}
+    100%{opacity:.9;transform:translate3d(var(--drift),105vh,0) rotate(var(--rotation));}
+  }
+  @keyframes winner-ticket-glow{
+    0%,100%{box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 rgba(212,175,55,0);}
+    45%{box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 90px rgba(212,175,55,.38);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .winner-reveal,.winner-title,.winner-reveal .code,.winner-reveal .code::after,
+    .celebration-burst,.celebration-piece,body.is-celebrating .ticket{animation:none;}
+  }
   .err{ color:var(--magenta); font-size:13px; margin-top:10px; text-align:center; display:none; }
   .err.show{ display:block; }
   .foot{ text-align:center; color:var(--muted); font-size:12px; margin-top:22px; letter-spacing:0.02em; }
@@ -235,6 +372,7 @@
 
 </div>
 
+<script src="/assets/promotion-campaign.js"></script>
 <script>
 /*
   Antes de publicar: troque a URL abaixo pela URL do seu Google Apps Script
@@ -244,6 +382,10 @@ const ENDPOINT_URL = "COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT";
 const LOCAL_TEST_MODE = location.protocol === 'file:' && ENDPOINT_URL.includes("COLE_AQUI");
 const LOCAL_TEST_STORAGE_KEY = 'donjuarez-promo-local-campaign-v2';
 const localTestState = loadLocalTestState();
+const campaign = window.DonJuarezCampaign;
+const pageSearchParams = new URLSearchParams(location.search);
+const previewPrize = pageSearchParams.get('preview');
+const LOCAL_PREVIEW_MODE = Boolean(previewPrize && campaign?.isLocalPreview(pageSearchParams));
 
 const form = document.getElementById('entryForm');
 const submitBtn = document.getElementById('submitBtn');
@@ -255,6 +397,13 @@ const entryNumOut = document.getElementById('entryNumOut');
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   errMsg.classList.remove('show');
+
+  const currentCampaignStatus = campaign.getStatus();
+  if (!currentCampaignStatus.active) {
+    showCampaignUnavailable(currentCampaignStatus);
+    return;
+  }
+
   submitBtn.disabled = true;
   submitBtn.textContent = 'Confirmando...';
 
@@ -388,28 +537,47 @@ function showClosed(message){
   resultBlock.classList.add('show');
 }
 
+function showCampaignUnavailable(status){
+  form.style.display = 'none';
+  entryNumOut.textContent = '—';
+  const label = status.state === 'before' ? 'Em breve' : 'Encerrada';
+  resultInner.innerHTML = `
+    <div class="result show" style="padding-top:10px;">
+      <div class="stamp lose">${label}</div>
+      <p>${status.message}</p>
+      <p>Obrigado pelo interesse na experiência Don Juarez × Roda Rico.</p>
+    </div>`;
+  resultBlock.classList.add('show');
+}
+
 function showResult(data){
   form.style.display = 'none';
   entryNumOut.textContent = '#' + String(data.entryNumber).padStart(3, '0');
 
   if (data.prizeType === 'TICKET') {
     resultInner.innerHTML = `
-      <div class="result show" style="padding-top:10px;">
-        <div class="stamp win">Experiência premiada</div>
+      <div class="result show winner-reveal" style="padding-top:10px;">
+        <div class="winner-kicker">Você foi selecionado</div>
+        <h2 class="winner-title">Parabéns!</h2>
+        <div class="winner-prize">Ingresso Roda Rico</div>
         <p>Uma experiência especial foi reservada para você.</p>
         <p><b style="color:var(--cream)">Seu ingresso para a Roda Rico está garantido.</b></p>
         <div class="code">${data.code}</div>
-        <p>Apresente este código no estande <b style="color:var(--cream)">Don Juarez</b> para receber seu ingresso físico.</p>
+        <p class="winner-instruction">Apresente este código no estande <b style="color:var(--cream)">Don Juarez</b> para receber seu ingresso físico.</p>
       </div>`;
+    launchCelebration('TICKET');
   } else if (data.prizeType === 'DISCOUNT') {
     resultInner.innerHTML = `
-      <div class="result show" style="padding-top:10px;">
-        <div class="stamp win">Benefício exclusivo</div>
+      <div class="result show winner-reveal" style="padding-top:10px;">
+        <div class="winner-kicker">Benefício exclusivo</div>
+        <h2 class="winner-title">Parabéns!</h2>
+        <div class="winner-prize">30% de desconto</div>
         <p>Um benefício especial foi reservado para você.</p>
         <p>Aproveite <b style="color:var(--cream)">30% de desconto</b> em produtos no estande Don Juarez.</p>
         <div class="code">${data.code}</div>
-        <p>Apresente este código no estande para liberar seu benefício.</p>
+        <p class="winner-instruction">Apresente este código no estande para liberar seu benefício.</p>
       </div>`;
+    launchCelebration('DISCOUNT');
   } else {
     resultInner.innerHTML = `
       <div class="result show" style="padding-top:10px;">
@@ -426,7 +594,73 @@ function showResult(data){
     );
   }
 
+  if (data.preview) {
+    resultInner.insertAdjacentHTML(
+      'beforeend',
+      '<p class="preview-note">Prévia visual — este código não é válido.</p>'
+    );
+  }
+
   resultBlock.classList.add('show');
+}
+
+function launchCelebration(prizeType){
+  document.querySelector('.celebration-layer')?.remove();
+  document.body.classList.remove('is-celebrating');
+
+  const layer = document.createElement('div');
+  layer.className = 'celebration-layer';
+  layer.setAttribute('aria-hidden', 'true');
+
+  const burst = document.createElement('div');
+  burst.className = 'celebration-burst';
+  layer.appendChild(burst);
+
+  const colors = prizeType === 'TICKET'
+    ? ['#d4af37', '#f4ecd8', '#7ed957', '#f6d766']
+    : ['#7ed957', '#d4af37', '#f4ecd8', '#b9ff9a'];
+
+  for (let index = 0; index < 46; index += 1) {
+    const piece = document.createElement('i');
+    piece.className = 'celebration-piece';
+    piece.style.setProperty('--x', `${(index * 37) % 100}vw`);
+    piece.style.setProperty('--size', `${5 + (index % 6)}px`);
+    piece.style.setProperty('--duration', `${2.6 + (index % 8) * 0.18}s`);
+    piece.style.setProperty('--delay', `${(index % 12) * 0.055}s`);
+    piece.style.setProperty('--drift', `${-90 + (index * 53) % 180}px`);
+    piece.style.setProperty('--rotation', `${240 + (index * 71) % 620}deg`);
+    piece.style.background = colors[index % colors.length];
+    layer.appendChild(piece);
+  }
+
+  document.body.appendChild(layer);
+  requestAnimationFrame(() => document.body.classList.add('is-celebrating'));
+
+  window.setTimeout(() => {
+    document.body.classList.remove('is-celebrating');
+    layer.remove();
+  }, 4800);
+}
+
+if (LOCAL_PREVIEW_MODE && previewPrize === 'ticket') {
+  showResult({
+    entryNumber: 147,
+    prizeType: 'TICKET',
+    code: 'DJ-RICO-7X9Q',
+    preview: true
+  });
+} else if (LOCAL_PREVIEW_MODE && previewPrize === 'discount') {
+  showResult({
+    entryNumber: 286,
+    prizeType: 'DISCOUNT',
+    code: 'DJ-30PC-A8KM',
+    preview: true
+  });
+} else {
+  const initialCampaignStatus = campaign.getStatus();
+  if (!initialCampaignStatus.active) {
+    showCampaignUnavailable(initialCampaignStatus);
+  }
 }
 
 </script>

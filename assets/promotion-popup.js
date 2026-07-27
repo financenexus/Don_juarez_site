@@ -1,6 +1,8 @@
 (() => {
   const DISMISSED_KEY = "donjuarez-promotion-dismissed-v1";
-  const FORCE_PREVIEW = new URLSearchParams(window.location.search).has("promo");
+  const searchParams = new URLSearchParams(window.location.search);
+  const campaign = window.DonJuarezCampaign;
+  const FORCE_PREVIEW = Boolean(campaign?.isLocalPreview(searchParams));
   const BOTTOM_THRESHOLD_PX = 80;
 
   let opened = false;
@@ -23,6 +25,7 @@
     },
   };
 
+  if (!campaign?.getStatus().active && !FORCE_PREVIEW) return;
   if (storage.get() && !FORCE_PREVIEW) return;
 
   const popup = document.createElement("div");
@@ -30,15 +33,26 @@
   popup.hidden = true;
   popup.innerHTML = `
     <div class="dj-promo__backdrop" data-promo-close></div>
+    <div class="dj-promo__stage" aria-hidden="true">
+      <div class="dj-promo__halo"></div>
+      <span class="dj-promo__spark dj-promo__spark--1"></span>
+      <span class="dj-promo__spark dj-promo__spark--2"></span>
+      <span class="dj-promo__spark dj-promo__spark--3"></span>
+      <span class="dj-promo__spark dj-promo__spark--4"></span>
+      <span class="dj-promo__spark dj-promo__spark--5"></span>
+      <span class="dj-promo__spark dj-promo__spark--6"></span>
+    </div>
     <section class="dj-promo__card" role="dialog" aria-modal="true" aria-labelledby="dj-promo-title" aria-describedby="dj-promo-copy">
       <button class="dj-promo__close" type="button" aria-label="Fechar promoção" data-promo-close>×</button>
       <p class="dj-promo__eyebrow">Don Juarez × Roda Rico</p>
-      <h2 class="dj-promo__title" id="dj-promo-title">Você entrou <span>na roda?</span></h2>
+      <p class="dj-promo__arrival">Sua chance chegou</p>
+      <h2 class="dj-promo__title" id="dj-promo-title">Entre para <span>viver essa experiência.</span></h2>
       <p class="dj-promo__copy" id="dj-promo-copy">
-        Siga <strong>@tabacodonjuarez</strong>, confirme sua participação e descubra na hora se uma experiência especial espera por você.
+        Confirme sua participação e descubra na hora se a Roda Rico reservou um momento especial para você.
       </p>
+      <div class="dj-promo__instant"><span></span> Resultado revelado na hora</div>
       <div class="dj-promo__actions">
-        <a class="dj-promo__cta" href="/promocao/" data-promo-cta>Participar da promoção</a>
+        <a class="dj-promo__cta" href="/promocao/" data-promo-cta>Entrar para concorrer</a>
         <button class="dj-promo__later" type="button" data-promo-close>Agora não</button>
       </div>
       <p class="dj-promo__legal">Participação exclusiva para maiores de 18 anos.</p>
