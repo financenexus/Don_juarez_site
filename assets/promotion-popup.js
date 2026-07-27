@@ -73,6 +73,7 @@
     opened = true;
     stopTriggers();
     previousFocus = document.activeElement;
+    document.documentElement.classList.add("dj-promo-lock");
     popup.hidden = false;
     window.requestAnimationFrame(() => {
       popup.classList.add("is-open");
@@ -83,6 +84,7 @@
   function closePopup() {
     if (!opened) return;
     storage.set("dismissed");
+    document.documentElement.classList.remove("dj-promo-lock");
     popup.classList.remove("is-open");
     window.setTimeout(() => {
       popup.hidden = true;

@@ -331,6 +331,51 @@
   .err{ color:var(--magenta); font-size:13px; margin-top:10px; text-align:center; display:none; }
   .err.show{ display:block; }
   .foot{ text-align:center; color:var(--muted); font-size:12px; margin-top:22px; letter-spacing:0.02em; }
+  @media(max-width:480px){
+    body{
+      align-items:flex-start;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        max(12px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom))
+        max(12px, env(safe-area-inset-left));
+    }
+    .eyebrow{font-size:10px;letter-spacing:.22em;}
+    h1{font-size:clamp(30px,10vw,38px);}
+    .sub{font-size:13.5px;margin-bottom:20px;}
+    .ticket{border-radius:14px;}
+    .stub-top{padding:22px 20px 24px;}
+    .stub-bottom{padding:24px 20px 22px;}
+    input[type=text],input[type=tel]{
+      min-height:48px;
+      padding:12px;
+      font-size:16px;
+    }
+    .ig-row{
+      min-height:54px;
+      align-items:flex-start;
+      padding:13px 12px;
+    }
+    .ig-row input{width:22px;height:22px;}
+    .ig-row label{font-size:13.5px;line-height:1.45;}
+    button.cta{min-height:52px;padding:13px 12px;}
+    .result{padding:28px 18px;}
+    .winner-title{font-size:clamp(44px,15vw,60px);}
+    .winner-prize{
+      width:100%;
+      min-height:44px;
+      padding:9px 12px;
+      font-size:11px;
+      letter-spacing:.09em;
+    }
+    .result .code{
+      overflow-wrap:anywhere;
+      padding:12px 8px;
+      font-size:clamp(16px,5.2vw,20px);
+      letter-spacing:.07em;
+    }
+    .result p{font-size:13.5px;}
+  }
 </style>
 </head>
 <body>

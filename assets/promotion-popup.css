@@ -14,6 +14,10 @@
   transition: opacity 220ms ease, visibility 220ms ease;
 }
 
+.dj-promo-lock {
+  overflow: hidden;
+}
+
 .dj-promo[hidden] {
   display: none;
 }
@@ -122,7 +126,11 @@
   position: relative;
   z-index: 1;
   width: min(620px, 100%);
-  overflow: hidden;
+  max-height: calc(100dvh - 40px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid rgba(212, 175, 55, 0.38);
   background:
     radial-gradient(circle at 100% 0%, rgba(126, 217, 87, 0.13), transparent 38%),
@@ -382,12 +390,78 @@
   }
 
   .dj-promo__card {
+    max-height: calc(100dvh - 24px);
     padding: 34px 26px 28px;
   }
 
   .dj-promo__title {
     font-size: clamp(36px, 10vw, 48px);
     letter-spacing: -0.01em;
+  }
+
+  .dj-promo__copy {
+    margin-top: 18px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .dj-promo__actions {
+    margin-top: 22px;
+  }
+
+  .dj-promo__cta {
+    min-height: 54px;
+  }
+}
+
+@media (max-width: 380px) {
+  .dj-promo {
+    padding: 8px;
+  }
+
+  .dj-promo__card {
+    max-height: calc(100dvh - 16px);
+    padding: 28px 20px 22px;
+  }
+
+  .dj-promo__card::before {
+    inset: 7px;
+  }
+
+  .dj-promo__eyebrow {
+    margin-bottom: 13px;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+  }
+
+  .dj-promo__arrival {
+    margin-bottom: 10px;
+    font-size: 9px;
+  }
+
+  .dj-promo__title {
+    font-size: clamp(33px, 9.5vw, 38px);
+  }
+
+  .dj-promo__copy {
+    margin-top: 14px;
+    font-size: 13.5px;
+  }
+
+  .dj-promo__instant {
+    margin-top: 14px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+
+  .dj-promo__actions {
+    gap: 6px;
+    margin-top: 18px;
+  }
+
+  .dj-promo__legal {
+    margin-top: 10px;
+    font-size: 9px;
   }
 }
 
