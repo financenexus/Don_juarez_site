@@ -30,7 +30,13 @@ const backendContext = vm.createContext({ Date, Math });
 vm.runInContext(
   backendSource +
     "\nglobalThis.getCampaignStatusForTest = getCampaignStatus_;" +
-    "\nglobalThis.selectPrizeForTest = selectPrize_;",
+    "\nglobalThis.selectPrizeForTest = selectPrize_;" +
+    "\nglobalThis.normalizePhoneForTest = normalizePhone_;" +
+    "\nglobalThis.normalizeEmailForTest = normalizeEmail_;" +
+    "\nglobalThis.normalizeInstagramForTest = normalizeInstagram_;" +
+    "\nglobalThis.isValidPhoneForTest = isValidPhone_;" +
+    "\nglobalThis.isValidEmailForTest = isValidEmail_;" +
+    "\nglobalThis.isValidInstagramForTest = isValidInstagram_;",
   backendContext
 );
 
@@ -38,6 +44,15 @@ assert.equal(backendContext.getCampaignStatusForTest(nowDuringPreparation).state
 assert.equal(backendContext.getCampaignStatusForTest(opening).state, "active");
 assert.equal(backendContext.getCampaignStatusForTest(finalSecond).state, "active");
 assert.equal(backendContext.getCampaignStatusForTest(closing).state, "after");
+assert.equal(backendContext.normalizePhoneForTest("+55 (11) 98765-4321"), "11987654321");
+assert.equal(backendContext.normalizeEmailForTest(" VISITOR@Example.COM "), "visitor@example.com");
+assert.equal(backendContext.normalizeInstagramForTest("@Don.Juarez_01"), "don.juarez_01");
+assert.equal(backendContext.isValidPhoneForTest("11987654321"), true);
+assert.equal(backendContext.isValidPhoneForTest("123"), false);
+assert.equal(backendContext.isValidEmailForTest("visitor@example.com"), true);
+assert.equal(backendContext.isValidEmailForTest("not-an-email"), false);
+assert.equal(backendContext.isValidInstagramForTest("don.juarez_01"), true);
+assert.equal(backendContext.isValidInstagramForTest("bad..name"), false);
 
 for (let campaignRun = 0; campaignRun < 1000; campaignRun++) {
   const counts = { tickets: 0, discounts: 0 };

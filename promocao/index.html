@@ -101,7 +101,7 @@
     font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
     color:var(--muted); margin:0 0 6px; font-weight:600;
   }
-  input[type=text], input[type=tel]{
+  input[type=text], input[type=tel], input[type=email]{
     width:100%;
     background:#0f0d16;
     border:1px solid var(--line);
@@ -114,7 +114,7 @@
     outline:none;
     transition:border-color .15s;
   }
-  input[type=text]:focus, input[type=tel]:focus{ border-color:var(--gold); }
+  input[type=text]:focus, input[type=tel]:focus, input[type=email]:focus{ border-color:var(--gold); }
 
   .ig-row{
     display:flex; align-items:center; gap:10px;
@@ -125,6 +125,13 @@
   .ig-row label{ font-size:14px; color:var(--cream); cursor:pointer; }
   .ig-row a{ color:var(--gold-bright); text-decoration:none; font-weight:600; }
   .ig-row a:hover{ text-decoration:underline; }
+  .consent-row{
+    display:flex; align-items:flex-start; gap:10px;
+    padding:2px 2px 0; margin-bottom:20px;
+  }
+  .consent-row input{ width:18px; height:18px; margin-top:2px; accent-color:var(--green); flex:none; }
+  .consent-row label{ color:var(--muted); font-size:12px; line-height:1.5; }
+  .consent-row a{ color:var(--gold-bright); }
 
   button.cta{
     width:100%;
@@ -346,7 +353,7 @@
     .ticket{border-radius:14px;}
     .stub-top{padding:22px 20px 24px;}
     .stub-bottom{padding:24px 20px 22px;}
-    input[type=text],input[type=tel]{
+    input[type=text],input[type=tel],input[type=email]{
       min-height:48px;
       padding:12px;
       font-size:16px;
@@ -358,6 +365,8 @@
     }
     .ig-row input{width:22px;height:22px;}
     .ig-row label{font-size:13.5px;line-height:1.45;}
+    .consent-row input{width:22px;height:22px;}
+    .consent-row label{font-size:12px;}
     button.cta{min-height:52px;padding:13px 12px;}
     .result{padding:28px 18px;}
     .winner-title{font-size:clamp(44px,15vw,60px);}
@@ -390,14 +399,22 @@
     <form id="entryForm">
       <div class="stub-top">
         <div class="label">Seu nome</div>
-        <input type="text" id="nome" placeholder="Como podemos te chamar" required>
-        <div class="label">Instagram ou WhatsApp</div>
-        <input type="text" id="contato" placeholder="@seuinstagram ou (11) 90000-0000" required>
+        <input type="text" id="nome" name="nome" autocomplete="name" minlength="2" maxlength="100" placeholder="Nome completo" required>
+        <div class="label">Telefone / WhatsApp</div>
+        <input type="tel" id="telefone" name="telefone" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="(11) 90000-0000" required>
+        <div class="label">E-mail</div>
+        <input type="email" id="email" name="email" autocomplete="email" maxlength="120" placeholder="voce@exemplo.com" required>
+        <div class="label">Instagram</div>
+        <input type="text" id="instagram" name="instagram" autocomplete="off" maxlength="31" pattern="@?[A-Za-z0-9._]{1,30}" title="Digite somente o usuário do Instagram" placeholder="@seuinstagram" required>
       </div>
       <div class="stub-bottom">
         <div class="ig-row">
           <input type="checkbox" id="igcheck" required>
           <label for="igcheck">Já sigo <a href="https://instagram.com/tabacodonjuarez" target="_blank" rel="noopener noreferrer">@tabacodonjuarez</a> no Instagram</label>
+        </div>
+        <div class="consent-row">
+          <input type="checkbox" id="marketingConsent">
+          <label for="marketingConsent">Aceito receber novidades e ofertas da Don Juarez por e-mail, telefone ou WhatsApp. Esta autorização é opcional e pode ser retirada depois. Consulte a <a href="/politica-de-privacidade/" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.</label>
         </div>
         <button type="submit" class="cta" id="submitBtn">Confirmar entrada</button>
         <div class="err" id="errMsg">Não deu pra confirmar agora — tenta de novo em alguns segundos.</div>
@@ -423,7 +440,7 @@
   Antes de publicar: troque a URL abaixo pela URL do seu Google Apps Script
   Web App (veja o arquivo apps-script.gs + instruções que vieram junto).
 */
-const ENDPOINT_URL = "COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT";
+const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzj0oV0iFiK5DDrzTjU2YbMr-BBKPIghFZG7y0fhrdempwUVD03cQBG3jTviXNP3HVWWQ/exec";
 const LOCAL_TEST_MODE = location.protocol === 'file:' && ENDPOINT_URL.includes("COLE_AQUI");
 const LOCAL_TEST_STORAGE_KEY = 'donjuarez-promo-local-campaign-v2';
 const localTestState = loadLocalTestState();
@@ -454,7 +471,10 @@ form.addEventListener('submit', async (e) => {
 
   const payload = {
     nome: document.getElementById('nome').value.trim(),
-    contato: document.getElementById('contato').value.trim()
+    telefone: document.getElementById('telefone').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    instagram: document.getElementById('instagram').value.trim(),
+    marketingConsent: document.getElementById('marketingConsent').checked
   };
 
   try {
@@ -481,9 +501,12 @@ form.addEventListener('submit', async (e) => {
     }
     showResult(data);
   } catch (err) {
+    const genericErrors = ["bad response", "Failed to fetch", "Load failed"];
     errMsg.textContent = err.message === "endpoint-not-configured"
       ? "Sistema ainda não conectado. Configure a URL do Google Apps Script."
-      : "Não deu pra confirmar agora — tenta de novo em alguns segundos.";
+      : genericErrors.includes(err.message)
+        ? "Não deu pra confirmar agora — tenta de novo em alguns segundos."
+        : err.message;
     errMsg.classList.add('show');
     submitBtn.disabled = false;
     submitBtn.textContent = 'Confirmar entrada';

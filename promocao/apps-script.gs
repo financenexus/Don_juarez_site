@@ -11,6 +11,7 @@ const TOTAL_TICKET_PRIZES = 4;
 const TOTAL_DISCOUNT_PRIZES = 50;
 const MAX_ENTRIES = 500;
 const SECRET_PROPERTY = "REDEMPTION_SECRET";
+const SPREADSHEET_ID = "15oTfl_BVBPn5B-XYF4HH-Y7kUwCs6FrdQ3qlijWf95k";
 const SHEET_NAME = "Entradas";
 
 function doPost(e) {
@@ -40,14 +41,32 @@ function doPost(e) {
 
     const sheet = getSheet_();
     const data = JSON.parse(e.postData.contents);
-    const nome = (data.nome || "").toString().slice(0, 100);
-    const contato = (data.contato || "").toString().slice(0, 100);
+    const nome = cleanText_(data.nome, 100);
+    const telefone = normalizePhone_(data.telefone);
+    const email = normalizeEmail_(data.email);
+    const instagram = normalizeInstagram_(data.instagram);
+    const marketingConsent = data.marketingConsent === true;
 
-    if (!nome || !contato) {
-      return jsonOutput_({ error: "Nome e contato são obrigatórios." });
+    if (!nome || !telefone || !email || !instagram) {
+      return jsonOutput_({ error: "Nome, telefone, e-mail e Instagram são obrigatórios." });
+    }
+    if (!isValidPhone_(telefone)) {
+      return jsonOutput_({ error: "Informe um telefone brasileiro válido com DDD." });
+    }
+    if (!isValidEmail_(email)) {
+      return jsonOutput_({ error: "Informe um e-mail válido." });
+    }
+    if (!isValidInstagram_(instagram)) {
+      return jsonOutput_({ error: "Informe um usuário válido do Instagram." });
     }
 
     const existingEntries = sheet.getLastRow() - 1;
+
+    if (findDuplicate_(sheet, existingEntries, telefone, email, instagram)) {
+      return jsonOutput_({
+        error: "Este telefone, e-mail ou Instagram já participou da promoção."
+      });
+    }
 
     if (existingEntries >= MAX_ENTRIES) {
       return jsonOutput_({
@@ -68,7 +87,11 @@ function doPost(e) {
     sheet.appendRow([
       new Date(),
       nome,
-      contato,
+      telefone,
+      email,
+      instagram,
+      marketingConsent ? "SIM" : "NAO",
+      marketingConsent ? new Date() : "",
       entryNumber,
       prizeType,
       code,
@@ -103,6 +126,52 @@ function getCampaignStatus_(now) {
   return { state: "active", active: true, message: "" };
 }
 
+function cleanText_(value, maxLength) {
+  return (value || "").toString().trim().replace(/\s+/g, " ").slice(0, maxLength);
+}
+
+function normalizePhone_(value) {
+  let digits = (value || "").toString().replace(/\D/g, "");
+  if ((digits.length === 12 || digits.length === 13) && digits.indexOf("55") === 0) {
+    digits = digits.slice(2);
+  }
+  return digits;
+}
+
+function normalizeEmail_(value) {
+  return cleanText_(value, 120).toLowerCase();
+}
+
+function normalizeInstagram_(value) {
+  return cleanText_(value, 31).replace(/^@/, "").toLowerCase();
+}
+
+function isValidPhone_(phone) {
+  return /^\d{10,11}$/.test(phone);
+}
+
+function isValidEmail_(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidInstagram_(instagram) {
+  return /^(?!.*\.\.)[a-z0-9._]{1,30}$/.test(instagram) &&
+    instagram.charAt(instagram.length - 1) !== ".";
+}
+
+function findDuplicate_(sheet, existingEntries, telefone, email, instagram) {
+  if (existingEntries <= 0) return false;
+
+  return sheet
+    .getRange(2, 3, existingEntries, 3)
+    .getValues()
+    .some(function(row) {
+      return normalizePhone_(row[0]) === telefone ||
+        normalizeEmail_(row[1]) === email ||
+        normalizeInstagram_(row[2]) === instagram;
+    });
+}
+
 function selectPrize_(existingEntries, prizeCounts, randomDraw) {
   const remainingTickets = Math.max(0, TOTAL_TICKET_PRIZES - prizeCounts.tickets);
   const remainingDiscounts = Math.max(0, TOTAL_DISCOUNT_PRIZES - prizeCounts.discounts);
@@ -128,7 +197,7 @@ function countPrizes_(sheet, existingEntries) {
   if (existingEntries <= 0) return { tickets: 0, discounts: 0 };
 
   return sheet
-    .getRange(2, 5, existingEntries, 1)
+    .getRange(2, 9, existingEntries, 1)
     .getValues()
     .reduce(function(counts, row) {
       if (row[0] === "TICKET") counts.tickets++;
@@ -163,12 +232,16 @@ function getSecret_() {
 }
 
 function getSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sheet = ss.getSheetByName(SHEET_NAME);
   const headers = [
     "Data/Hora",
     "Nome",
-    "Contato",
+    "Telefone",
+    "E-mail",
+    "Instagram",
+    "Consentimento Marketing",
+    "Data Consentimento",
     "Nº Entrada",
     "Prêmio",
     "Código",
