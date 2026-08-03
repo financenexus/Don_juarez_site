@@ -15,6 +15,18 @@ const SPREADSHEET_ID = "15oTfl_BVBPn5B-XYF4HH-Y7kUwCs6FrdQ3qlijWf95k";
 const SHEET_NAME = "Entradas";
 
 function doPost(e) {
+  let data;
+  try {
+    data = JSON.parse(e.postData.contents);
+  } catch (err) {
+    return jsonOutput_({ error: "Requisição inválida." });
+  }
+
+  const action = cleanText_(data.action, 30);
+  if (action === "verifyPrize" || action === "redeemPrize") {
+    return handlePrizeValidation_(data, action === "redeemPrize");
+  }
+
   const campaignStatus = getCampaignStatus_(Date.now());
 
   if (!campaignStatus.active) {
@@ -40,7 +52,6 @@ function doPost(e) {
     }
 
     const sheet = getSheet_();
-    const data = JSON.parse(e.postData.contents);
     const nome = cleanText_(data.nome, 100);
     const telefone = normalizePhone_(data.telefone);
     const email = normalizeEmail_(data.email);
@@ -98,7 +109,8 @@ function doPost(e) {
       prizeType !== "NONE" ? "NAO" : "",
       selection.ticketProbability,
       selection.discountProbability,
-      randomDraw
+      randomDraw,
+      ""
     ]);
 
     return jsonOutput_({
@@ -109,6 +121,66 @@ function doPost(e) {
     });
   } catch (err) {
     return jsonOutput_({ error: err.message });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function handlePrizeValidation_(data, redeem) {
+  const code = normalizeWinnerCode_(data.code);
+  const telefone = normalizePhone_(data.telefone);
+
+  if (!/^DJ-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code) || !isValidPhone_(telefone)) {
+    return jsonOutput_({ valid: false, error: "Código ou telefone inválido." });
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+
+  try {
+    const sheet = getSheet_();
+    const existingEntries = sheet.getLastRow() - 1;
+    if (existingEntries <= 0) {
+      return jsonOutput_({ valid: false, error: "Prêmio não encontrado." });
+    }
+
+    const rows = sheet.getRange(2, 1, existingEntries, 15).getValues();
+    for (let index = 0; index < rows.length; index++) {
+      const row = rows[index];
+      const storedPhone = normalizePhone_(row[2]);
+      const prizeType = cleanText_(row[8], 20);
+      const storedCode = normalizeWinnerCode_(row[9]);
+      const redeemed = cleanText_(row[10], 10).toUpperCase() === "SIM";
+
+      if (storedCode !== code || storedPhone !== telefone || prizeType === "NONE") continue;
+
+      if (redeemed) {
+        return jsonOutput_({
+          valid: false,
+          alreadyRedeemed: true,
+          error: "Este prêmio já foi resgatado."
+        });
+      }
+
+      if (redeem) {
+        const sheetRow = index + 2;
+        sheet.getRange(sheetRow, 11).setValue("SIM");
+        sheet.getRange(sheetRow, 15).setValue(new Date());
+      }
+
+      return jsonOutput_({
+        valid: true,
+        redeemed: redeem,
+        winnerName: cleanText_(row[1], 100),
+        entryNumber: row[7],
+        prizeType: prizeType,
+        code: storedCode
+      });
+    }
+
+    return jsonOutput_({ valid: false, error: "Código ou telefone não confere." });
+  } catch (err) {
+    return jsonOutput_({ valid: false, error: "Não foi possível validar agora." });
   } finally {
     lock.releaseLock();
   }
@@ -144,6 +216,10 @@ function normalizeEmail_(value) {
 
 function normalizeInstagram_(value) {
   return cleanText_(value, 31).replace(/^@/, "").toLowerCase();
+}
+
+function normalizeWinnerCode_(value) {
+  return cleanText_(value, 20).toUpperCase();
 }
 
 function isValidPhone_(phone) {
@@ -248,7 +324,8 @@ function getSheet_() {
     "Resgatado",
     "Prob. Ingresso",
     "Prob. Desconto",
-    "Número Aleatório"
+    "Número Aleatório",
+    "Data/Hora Resgate"
   ];
 
   if (!sheet) {

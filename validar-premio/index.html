@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Validar prêmio | Don Juarez</title>
+  <style>
+    :root{color-scheme:dark;--gold:#efc83d;--green:#79e34e;--red:#ff6d6d;--ink:#080a08;--panel:#12130f;--text:#f4efe4;--muted:#aaa497}
+    *{box-sizing:border-box} body{margin:0;min-height:100dvh;background:radial-gradient(circle at top,#202318 0,var(--ink) 48%);color:var(--text);font-family:Arial,sans-serif;padding:max(24px,env(safe-area-inset-top)) 18px max(24px,env(safe-area-inset-bottom))}
+    main{width:min(100%,520px);margin:auto}.brand{color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.25em;text-transform:uppercase}h1{font-family:Georgia,serif;font-size:clamp(32px,10vw,52px);line-height:1;margin:20px 0 12px}.intro{color:var(--muted);line-height:1.55;margin:0 0 28px}
+    form,.result{background:rgba(18,19,15,.96);border:1px solid #51461c;border-radius:18px;padding:22px;box-shadow:0 24px 60px #0008}label{display:block;margin:0 0 7px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}input{width:100%;min-height:52px;margin:0 0 18px;border:1px solid #51461c;border-radius:9px;background:#090a08;color:var(--text);font-size:16px;padding:13px;outline:none}input:focus{border-color:var(--gold)}button{width:100%;min-height:54px;border:0;border-radius:9px;background:var(--gold);color:#111;font-weight:900;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}button:disabled{opacity:.55;cursor:wait}
+    .result{display:none;margin-top:18px}.result.show{display:block}.result.ok{border-color:var(--green)}.result.bad{border-color:var(--red)}.status{font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.ok .status{color:var(--green)}.bad .status{color:var(--red)}.result h2{font-family:Georgia,serif;font-size:30px;margin:10px 0}.details{color:var(--muted);line-height:1.6}.redeem{margin-top:18px;background:var(--green)}.notice{font-size:12px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.5}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand">Don Juarez · uso no estande</div>
+    <h1>Validar prêmio</h1>
+    <p class="intro">Não aceite apenas o cartão ou uma captura de tela. Confirme o código e o telefone diretamente na base oficial.</p>
+    <form id="verifyForm">
+      <label for="code">Código do prêmio</label>
+      <input id="code" autocomplete="off" autocapitalize="characters" placeholder="DJ-XXXX-XXXX" maxlength="12" required>
+      <label for="telefone">Telefone do visitante</label>
+      <input id="telefone" type="tel" autocomplete="off" inputmode="tel" placeholder="(11) 90000-0000" maxlength="20" required>
+      <button id="verifyButton" type="submit">Verificar código</button>
+    </form>
+    <section id="result" class="result" aria-live="polite"></section>
+    <p class="notice">Peça ao visitante para confirmar o telefone cadastrado. Um prêmio marcado como resgatado não pode ser usado novamente.</p>
+  </main>
+  <script>
+    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzj0oV0iFiK5DDrzTjU2YbMr-BBKPIghFZG7y0fhrdempwUVD03cQBG3jTviXNP3HVWWQ/exec";
+    const form = document.getElementById("verifyForm");
+    const result = document.getElementById("result");
+    const verifyButton = document.getElementById("verifyButton");
+    let verified = null;
+
+    async function request(action) {
+      const response = await fetch(ENDPOINT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({action,code:document.getElementById("code").value,telefone:document.getElementById("telefone").value})
+      });
+      if (!response.ok) throw new Error("Falha de conexão.");
+      return response.json();
+    }
+
+    function prizeLabel(type) {
+      return type === "TICKET" ? "Ingresso Roda Rico" : "30% de desconto";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[character]);
+    }
+
+    function showFailure(message) {
+      verified = null;
+      result.className = "result show bad";
+      result.innerHTML = `<div class="status">Não autorizado</div><h2>Prêmio inválido</h2><div class="details">${escapeHtml(message)}</div>`;
+    }
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault(); verifyButton.disabled = true; verifyButton.textContent = "Verificando…";
+      try {
+        const data = await request("verifyPrize");
+        if (!data.valid) return showFailure(data.error || "Código não encontrado.");
+        verified = data;
+        result.className = "result show ok";
+        result.innerHTML = `<div class="status">Código confirmado</div><h2>${prizeLabel(data.prizeType)}</h2><div class="details"><strong>${escapeHtml(data.winnerName)}</strong><br>Entrada nº ${escapeHtml(data.entryNumber)}<br>Código ${escapeHtml(data.code)}</div><button class="redeem" id="redeemButton" type="button">Confirmar entrega do prêmio</button>`;
+        document.getElementById("redeemButton").addEventListener("click", redeemPrize);
+      } catch (error) { showFailure("Não foi possível consultar a base agora. Não entregue o prêmio."); }
+      finally { verifyButton.disabled = false; verifyButton.textContent = "Verificar código"; }
+    });
+
+    async function redeemPrize() {
+      if (!verified || !confirm("Confirma que o prêmio foi entregue ao visitante? Esta ação não pode ser desfeita.")) return;
+      const button = document.getElementById("redeemButton"); button.disabled = true; button.textContent = "Registrando…";
+      try {
+        const data = await request("redeemPrize");
+        if (!data.valid || !data.redeemed) return showFailure(data.error || "Não foi possível registrar o resgate.");
+        result.innerHTML = `<div class="status">Entrega registrada</div><h2>Prêmio resgatado</h2><div class="details"><strong>${escapeHtml(data.winnerName)}</strong><br>${prizeLabel(data.prizeType)}<br>O código ${escapeHtml(data.code)} agora está bloqueado para novo uso.</div>`;
+      } catch (error) { showFailure("Não foi possível registrar o resgate. Verifique a planilha antes de entregar."); }
+    }
+  </script>
+</body>
+</html>

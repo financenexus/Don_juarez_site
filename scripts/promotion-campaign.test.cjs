@@ -34,6 +34,7 @@ vm.runInContext(
     "\nglobalThis.normalizePhoneForTest = normalizePhone_;" +
     "\nglobalThis.normalizeEmailForTest = normalizeEmail_;" +
     "\nglobalThis.normalizeInstagramForTest = normalizeInstagram_;" +
+    "\nglobalThis.normalizeWinnerCodeForTest = normalizeWinnerCode_;" +
     "\nglobalThis.isValidPhoneForTest = isValidPhone_;" +
     "\nglobalThis.isValidEmailForTest = isValidEmail_;" +
     "\nglobalThis.isValidInstagramForTest = isValidInstagram_;",
@@ -47,6 +48,7 @@ assert.equal(backendContext.getCampaignStatusForTest(closing).state, "after");
 assert.equal(backendContext.normalizePhoneForTest("+55 (11) 98765-4321"), "11987654321");
 assert.equal(backendContext.normalizeEmailForTest(" VISITOR@Example.COM "), "visitor@example.com");
 assert.equal(backendContext.normalizeInstagramForTest("@Don.Juarez_01"), "don.juarez_01");
+assert.equal(backendContext.normalizeWinnerCodeForTest(" dj-ab12-cd34 "), "DJ-AB12-CD34");
 assert.equal(backendContext.isValidPhoneForTest("11987654321"), true);
 assert.equal(backendContext.isValidPhoneForTest("123"), false);
 assert.equal(backendContext.isValidEmailForTest("visitor@example.com"), true);
