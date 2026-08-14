@@ -3,7 +3,9 @@
   const searchParams = new URLSearchParams(window.location.search);
   const campaign = window.DonJuarezCampaign;
   const FORCE_PREVIEW = Boolean(campaign?.isLocalPreview(searchParams));
+  const TIMER_PREVIEW = searchParams.get("promo") === "timer";
   const BOTTOM_THRESHOLD_PX = 80;
+  const AUTO_OPEN_DELAY_MS = 30000;
 
   let opened = false;
   let previousFocus = null;
@@ -25,8 +27,8 @@
     },
   };
 
-  if (!campaign?.getStatus().active && !FORCE_PREVIEW) return;
-  if (storage.get() && !FORCE_PREVIEW) return;
+  if (!campaign?.getStatus().active && !FORCE_PREVIEW && !TIMER_PREVIEW) return;
+  if (storage.get() && !FORCE_PREVIEW && !TIMER_PREVIEW) return;
 
   const popup = document.createElement("div");
   popup.className = "dj-promo";
@@ -61,11 +63,11 @@
   document.body.appendChild(popup);
 
   const cta = popup.querySelector("[data-promo-cta]");
-  let previewTimer;
+  let openTimer;
 
   function stopTriggers() {
     window.removeEventListener("scroll", handleScroll);
-    window.clearTimeout(previewTimer);
+    window.clearTimeout(openTimer);
   }
 
   function openPopup() {
@@ -113,5 +115,5 @@
   });
 
   window.addEventListener("scroll", handleScroll, { passive: true });
-  if (FORCE_PREVIEW) previewTimer = window.setTimeout(openPopup, 50);
+  openTimer = window.setTimeout(openPopup, FORCE_PREVIEW ? 50 : AUTO_OPEN_DELAY_MS);
 })();
