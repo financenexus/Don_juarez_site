@@ -322,9 +322,9 @@ function getSheet_() {
     "Prêmio",
     "Código",
     "Resgatado",
-    "Prob. Ingresso",
-    "Prob. Desconto",
-    "Número Aleatório",
+    "Chance de ingresso neste sorteio",
+    "Chance de desconto neste sorteio",
+    "Sorteio interno (0 a 1)",
     "Data/Hora Resgate"
   ];
 
