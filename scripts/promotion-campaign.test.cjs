@@ -20,7 +20,7 @@ const opening = Date.parse("2026-08-15T00:00:00-03:00");
 const finalSecond = Date.parse("2026-08-16T23:59:59.999-03:00");
 const closing = Date.parse("2026-08-17T00:00:00-03:00");
 
-assert.equal(campaign.getStatus(nowDuringPreparation).state, "active");
+assert.equal(campaign.getStatus(nowDuringPreparation).state, "before");
 assert.equal(campaign.getStatus(opening).state, "active");
 assert.equal(campaign.getStatus(finalSecond).state, "active");
 assert.equal(campaign.getStatus(closing).state, "after");
@@ -30,6 +30,8 @@ const backendContext = vm.createContext({ Date, Math });
 vm.runInContext(
   backendSource +
     "\nglobalThis.getCampaignStatusForTest = getCampaignStatus_;" +
+    "\nglobalThis.getCampaignDayIndexForTest = getCampaignDayIndex_;" +
+    "\nglobalThis.countEntriesForDayForTest = countEntriesForDay_;" +
     "\nglobalThis.selectPrizeForTest = selectPrize_;" +
     "\nglobalThis.normalizePhoneForTest = normalizePhone_;" +
     "\nglobalThis.normalizeEmailForTest = normalizeEmail_;" +
@@ -41,10 +43,18 @@ vm.runInContext(
   backendContext
 );
 
-assert.equal(backendContext.getCampaignStatusForTest(nowDuringPreparation).state, "active");
+assert.equal(backendContext.getCampaignStatusForTest(nowDuringPreparation).state, "before");
 assert.equal(backendContext.getCampaignStatusForTest(opening).state, "active");
 assert.equal(backendContext.getCampaignStatusForTest(finalSecond).state, "active");
 assert.equal(backendContext.getCampaignStatusForTest(closing).state, "after");
+assert.equal(backendContext.getCampaignDayIndexForTest(opening), 1);
+assert.equal(backendContext.getCampaignDayIndexForTest(Date.parse("2026-08-16T12:00:00-03:00")), 2);
+assert.equal(backendContext.getCampaignDayIndexForTest(closing), 0);
+const dailyRows = [];
+for (let index = 0; index < 250; index++) dailyRows.push([new Date(opening + index * 1000)]);
+for (let index = 0; index < 249; index++) dailyRows.push([new Date(Date.parse("2026-08-16T00:00:00-03:00") + index * 1000)]);
+assert.equal(backendContext.countEntriesForDayForTest(dailyRows, opening), 250);
+assert.equal(backendContext.countEntriesForDayForTest(dailyRows, Date.parse("2026-08-16T12:00:00-03:00")), 249);
 assert.equal(backendContext.normalizePhoneForTest("+55 (11) 98765-4321"), "11987654321");
 assert.equal(backendContext.normalizeEmailForTest(" VISITOR@Example.COM "), "visitor@example.com");
 assert.equal(backendContext.normalizeInstagramForTest("@Don.Juarez_01"), "don.juarez_01");

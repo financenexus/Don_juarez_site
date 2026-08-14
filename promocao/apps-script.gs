@@ -3,13 +3,16 @@
  * Cole este código em Extensões > Apps Script, dentro de uma Planilha Google.
  */
 
-// Ativa imediatamente e encerra após 16 de agosto, no horário de São Paulo.
+// Ativa apenas nos dias 15 e 16 de agosto, no horário de São Paulo.
+const CAMPAIGN_START_AT = Date.parse("2026-08-15T00:00:00-03:00");
+const CAMPAIGN_DAY_TWO_AT = Date.parse("2026-08-16T00:00:00-03:00");
 const CAMPAIGN_END_AT_EXCLUSIVE = Date.parse("2026-08-17T00:00:00-03:00");
 
 // Distribui aleatoriamente 4 ingressos e 50 descontos entre 500 entradas.
 const TOTAL_TICKET_PRIZES = 4;
 const TOTAL_DISCOUNT_PRIZES = 50;
 const MAX_ENTRIES = 500;
+const MAX_ENTRIES_PER_DAY = 250;
 const SECRET_PROPERTY = "REDEMPTION_SECRET";
 const SPREADSHEET_ID = "15oTfl_BVBPn5B-XYF4HH-Y7kUwCs6FrdQ3qlijWf95k";
 const SHEET_NAME = "Entradas";
@@ -71,11 +74,23 @@ function doPost(e) {
       return jsonOutput_({ error: "Informe um usuário válido do Instagram." });
     }
 
-    const existingEntries = sheet.getLastRow() - 1;
+    const existingRows = sheet.getLastRow() - 1;
 
-    if (findDuplicate_(sheet, existingEntries, telefone, email, instagram)) {
+    if (findDuplicate_(sheet, existingRows, telefone, email, instagram)) {
       return jsonOutput_({
         error: "Este telefone, e-mail ou Instagram já participou da promoção."
+      });
+    }
+
+    const campaignRows = getCampaignRows_(sheet, existingRows);
+    const existingEntries = campaignRows.length;
+    const todayEntries = countEntriesForDay_(campaignRows, Date.now());
+
+    if (todayEntries >= MAX_ENTRIES_PER_DAY) {
+      return jsonOutput_({
+        closed: true,
+        campaignState: "day-full",
+        message: "As 250 participações de hoje já foram preenchidas."
       });
     }
 
@@ -87,7 +102,7 @@ function doPost(e) {
     }
 
     const entryNumber = existingEntries + 1;
-    const prizeCounts = countPrizes_(sheet, existingEntries);
+    const prizeCounts = countPrizesFromRows_(campaignRows);
     const randomDraw = Math.random();
     const selection = selectPrize_(existingEntries, prizeCounts, randomDraw);
     const prizeType = selection.prizeType;
@@ -187,6 +202,14 @@ function handlePrizeValidation_(data, redeem) {
 }
 
 function getCampaignStatus_(now) {
+  if (now < CAMPAIGN_START_AT) {
+    return {
+      state: "before",
+      active: false,
+      message: "A promoção começa em 15 de agosto de 2026."
+    };
+  }
+
   if (now >= CAMPAIGN_END_AT_EXCLUSIVE) {
     return {
       state: "after",
@@ -196,6 +219,34 @@ function getCampaignStatus_(now) {
   }
 
   return { state: "active", active: true, message: "" };
+}
+
+function getCampaignRows_(sheet, existingRows) {
+  if (existingRows <= 0) return [];
+
+  return sheet
+    .getRange(2, 1, existingRows, 15)
+    .getValues()
+    .filter(function(row) {
+      const timestamp = row[0] instanceof Date ? row[0].getTime() : new Date(row[0]).getTime();
+      return timestamp >= CAMPAIGN_START_AT && timestamp < CAMPAIGN_END_AT_EXCLUSIVE;
+    });
+}
+
+function getCampaignDayIndex_(timestamp) {
+  if (timestamp >= CAMPAIGN_START_AT && timestamp < CAMPAIGN_DAY_TWO_AT) return 1;
+  if (timestamp >= CAMPAIGN_DAY_TWO_AT && timestamp < CAMPAIGN_END_AT_EXCLUSIVE) return 2;
+  return 0;
+}
+
+function countEntriesForDay_(campaignRows, now) {
+  const dayIndex = getCampaignDayIndex_(now);
+  if (!dayIndex) return 0;
+
+  return campaignRows.filter(function(row) {
+    const timestamp = row[0] instanceof Date ? row[0].getTime() : new Date(row[0]).getTime();
+    return getCampaignDayIndex_(timestamp) === dayIndex;
+  }).length;
 }
 
 function cleanText_(value, maxLength) {
@@ -280,6 +331,14 @@ function countPrizes_(sheet, existingEntries) {
       if (row[0] === "DISCOUNT") counts.discounts++;
       return counts;
     }, { tickets: 0, discounts: 0 });
+}
+
+function countPrizesFromRows_(rows) {
+  return rows.reduce(function(counts, row) {
+    if (row[8] === "TICKET") counts.tickets++;
+    if (row[8] === "DISCOUNT") counts.discounts++;
+    return counts;
+  }, { tickets: 0, discounts: 0 });
 }
 
 function generateCode_(entryNumber, prizeType) {
