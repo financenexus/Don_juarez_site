@@ -5,7 +5,7 @@
   const FORCE_PREVIEW = Boolean(campaign?.isLocalPreview(searchParams));
   const TIMER_PREVIEW = searchParams.get("promo") === "timer";
   const BOTTOM_THRESHOLD_PX = 80;
-  const AUTO_OPEN_DELAY_MS = 15000;
+  const AUTO_OPEN_DELAY_MS = 5000;
 
   let opened = false;
   let previousFocus = null;

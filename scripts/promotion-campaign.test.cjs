@@ -16,7 +16,7 @@ const frontendContext = vm.createContext({
 vm.runInContext(frontendSource, frontendContext);
 
 const campaign = frontendWindow.DonJuarezCampaign;
-assert.match(popupSource, /AUTO_OPEN_DELAY_MS\s*=\s*15000/);
+assert.match(popupSource, /AUTO_OPEN_DELAY_MS\s*=\s*5000/);
 assert.match(popupSource, /TIMER_PREVIEW\s*=\s*searchParams\.get\("promo"\) === "timer"/);
 assert.match(popupSource, /setTimeout\(openPopup, FORCE_PREVIEW \? 50 : AUTO_OPEN_DELAY_MS\)/);
 const nowDuringPreparation = Date.parse("2026-07-27T12:00:00-03:00");
