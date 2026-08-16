@@ -13,6 +13,8 @@ const TOTAL_TICKET_PRIZES = 4;
 const TOTAL_DISCOUNT_PRIZES = 50;
 const MAX_ENTRIES = 500;
 const MAX_ENTRIES_PER_DAY = 250;
+// No último dia, aumenta a chance do desconto para 50%, sem ultrapassar o estoque total.
+const FINAL_DAY_DISCOUNT_PROBABILITY = 0.50;
 const SECRET_PROPERTY = "REDEMPTION_SECRET";
 const SPREADSHEET_ID = "15oTfl_BVBPn5B-XYF4HH-Y7kUwCs6FrdQ3qlijWf95k";
 const SHEET_NAME = "Entradas";
@@ -104,7 +106,7 @@ function doPost(e) {
     const entryNumber = existingEntries + 1;
     const prizeCounts = countPrizesFromRows_(campaignRows);
     const randomDraw = Math.random();
-    const selection = selectPrize_(existingEntries, prizeCounts, randomDraw);
+    const selection = selectPrize_(existingEntries, prizeCounts, randomDraw, Date.now());
     const prizeType = selection.prizeType;
     const code = prizeType !== "NONE"
       ? generateCode_(entryNumber, prizeType)
@@ -299,12 +301,18 @@ function findDuplicate_(sheet, existingEntries, telefone, email, instagram) {
     });
 }
 
-function selectPrize_(existingEntries, prizeCounts, randomDraw) {
+function selectPrize_(existingEntries, prizeCounts, randomDraw, now) {
   const remainingTickets = Math.max(0, TOTAL_TICKET_PRIZES - prizeCounts.tickets);
   const remainingDiscounts = Math.max(0, TOTAL_DISCOUNT_PRIZES - prizeCounts.discounts);
   const remainingEntries = MAX_ENTRIES - existingEntries;
   const ticketProbability = remainingTickets / remainingEntries;
-  const discountProbability = remainingDiscounts / remainingEntries;
+  const standardDiscountProbability = remainingDiscounts / remainingEntries;
+  const isFinalCampaignDay = getCampaignDayIndex_(now) === 2;
+  const discountProbability = remainingDiscounts === 0
+    ? 0
+    : isFinalCampaignDay
+      ? FINAL_DAY_DISCOUNT_PROBABILITY
+      : standardDiscountProbability;
   let prizeType = "NONE";
 
   if (randomDraw < ticketProbability) {

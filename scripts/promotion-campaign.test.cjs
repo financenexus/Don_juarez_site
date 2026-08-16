@@ -77,7 +77,8 @@ for (let campaignRun = 0; campaignRun < 1000; campaignRun++) {
     const result = backendContext.selectPrizeForTest(
       existingEntries,
       counts,
-      Math.random()
+      Math.random(),
+      opening
     );
 
     if (result.prizeType === "TICKET") counts.tickets++;
@@ -90,4 +91,26 @@ for (let campaignRun = 0; campaignRun < 1000; campaignRun++) {
   assert.equal(counts.discounts, 50);
 }
 
-console.log("PASS: campaign dates and 1,000 complete prize distributions.");
+const finalDayCounts = { tickets: 0, discounts: 2 };
+const standardDayResult = backendContext.selectPrizeForTest(21, finalDayCounts, 0.4, opening);
+const boostedFinalDayResult = backendContext.selectPrizeForTest(
+  21,
+  finalDayCounts,
+  0.4,
+  Date.parse("2026-08-16T12:00:00-03:00")
+);
+assert.equal(standardDayResult.prizeType, "NONE");
+assert.equal(boostedFinalDayResult.prizeType, "DISCOUNT");
+assert.equal(boostedFinalDayResult.discountProbability, 0.5);
+
+const exhaustedDiscountCounts = { tickets: 0, discounts: 50 };
+const exhaustedDiscountResult = backendContext.selectPrizeForTest(
+  21,
+  exhaustedDiscountCounts,
+  0.4,
+  Date.parse("2026-08-16T12:00:00-03:00")
+);
+assert.equal(exhaustedDiscountResult.prizeType, "NONE");
+assert.equal(exhaustedDiscountResult.discountProbability, 0);
+
+console.log("PASS: campaign dates, 1,000 complete prize distributions, and final-day 50% discount boost.");
